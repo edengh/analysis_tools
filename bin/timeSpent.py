@@ -70,21 +70,22 @@ def parseTimeInRanges(filename, lowerRange, upperRange, id, startDateFile):
                             rowDate = row[0].split(" ")[0]
                             rowDate = datetime.datetime.strptime(rowDate, '%m/%d/%Y').date()
                         except ValueError:
-                            try:
-                                rowDateList = row[0].split(" ")
-                                for item in rowDateList:
-                                    print (item)
-                                rowDate = datetime.datetime.strptime(rowDate, '%a %b %d %Y').date()
-                            except ValueError:
-                                try:
-                                    rowDate = row[0].split(" ")[0]
-                                    rowDate = datetime.datetime.strptime(rowDate, '%Y-%m-%d').date()
-                                except ValueError:
-                                    try:
-                                        rowDate = datetime.datetime.strptime(row[0], '%a %b %d %H:%M:%S').date()
-                                    except ValueError:
-                                        print (row[0])
-                                        print ("Data is null")
+                            print (row[0])
+                            #try:
+                            #   rowDateList = row[0].split(" ")
+                            #   for item in rowDateList:
+                            #       print (item)
+                            #   rowDate = datetime.datetime.strptime(rowDate, '%a %b %d %Y').date()
+                            #except ValueError:
+                            #   try:
+                            #       rowDate = row[0].split(" ")[0]
+                            #       rowDate = datetime.datetime.strptime(rowDate, '%Y-%m-%d').date()
+                            #   except ValueError:
+                                    #try:
+                                    #rowDate = datetime.datetime.strptime(row[0], '%a %b %d %H:%M:%S').date()
+                                    #except ValueError:
+                                    #print (row[0])
+                                    #print ("Data is null")
                     if rowDate < startDate:
                         if bloodSugar.isdigit():
                             bloodSugar = int(bloodSugar)
@@ -116,14 +117,43 @@ def parseTimeInRanges(filename, lowerRange, upperRange, id, startDateFile):
 
 #else:
 
+def parseTimeInRangesNoFile(filename, lowerRange, upperRange, id):
+    with open (filename, 'r', newline='') as file:
+        csvreader = csv.reader(file,quotechar='|')
+        lowcount = 0
+        rangecount = 0
+        highcount = 0
+        totalcount = 0
+        lowerRange = int(lowerRange)
+        upperRange = int(upperRange)
+        id = id.split("_")
+        id = id[0]
+        for row in csvreader:
+            bloodSugar = row[1].strip()
+            if bloodSugar.isdigit():
+                bloodSugar = int(bloodSugar)
+                if bloodSugar < lowerRange:
+                    lowcount += 1
+                elif lowerRange < bloodSugar < upperRange:
+                    rangecount += 1
+                elif bloodSugar > upperRange:
+                    highcount += 1
+                totalcount += 1
+        calculateTime(lowcount, totalcount, "low")
+        calculateTime(rangecount, totalcount, "range")
+        calculateTime(highcount, totalcount, "high")
+
 #run script on all entries files in folder
-def flipThroughPath(path, lowerRange, upperRange, startDateFile):
+def flipThroughPath(path, lowerRange, upperRange, startDateFile = "none"):
     for subdirectory, directory, filenames in os.walk(path):
         for file in filenames:
             filepath = subdirectory + os.sep + file
             if filepath.endswith(".csv") and "entries" in filepath:
                 print (filepath)
-                parseTimeInRanges(filepath, lowerRange, upperRange, file, startDateFile)
+                if os.path.isfile(startDateFile):
+                    parseTimeInRanges(filepath, lowerRange, upperRange, file, startDateFile)
+                else:
+                    parseTimeInRangesNoFile(filepath, lowerRange, upperRange, file)
 
 #convert from mmol to mgdl if needed
 def mmol(number):
@@ -136,15 +166,19 @@ def main():
         print ("needs at least 3 arguments")
         sys.exit(1)
         return
-
+    
     pathDirectory = sys.argv[1]
     lowerRange = int(sys.argv[2])
     upperRange = int(sys.argv[3])
-    startDateFile = sys.argv[4]
     if upperRange < 25:
         lowerRange = mmol(lowerRange)
         upperRange = mmol(upperRange)
-    flipThroughPath(pathDirectory, lowerRange, upperRange, startDateFile)
+
+    if len(argvs) == 3:
+        flipThroughPath(pathDirectory, lowerRange, upperRange)
+    elif len(argvs) > 3:
+        startDateFile = sys.argv[4]
+        flipThroughPath(pathDirectory, lowerRange, upperRange, startDateFile)
     
 if __name__ == "__main__":
     main()
