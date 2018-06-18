@@ -37,10 +37,12 @@ def parseTimeInRanges(filename, lowerRange, upperRange, id, startDateFile):
         rangecountafterloop = 0
         highcountafterloop = 0
         totalcountafterloop = 0
+        
         lowerRange = int(lowerRange)
         upperRange = int(upperRange)
         id = id.split("_")
         id = id[0]
+        
         if not id in startDates:
             for row in csvreader:
                 bloodSugar = row[1].strip()
@@ -70,22 +72,19 @@ def parseTimeInRanges(filename, lowerRange, upperRange, id, startDateFile):
                             rowDate = row[0].split(" ")[0]
                             rowDate = datetime.datetime.strptime(rowDate, '%m/%d/%Y').date()
                         except ValueError:
-                            print (row[0])
                             try:
-                               rowDateList = row[0].split(" ")
-                               for item in rowDateList:
-                                   print (item)
-                               rowDate = datetime.datetime.strptime(rowDate, '%a %b %d %Y').date()
+                                rowDate = row[0].split(" ")[0]
+                                rowDate = datetime.datetime.strptime(rowDate, '%Y-%m-%d').date()
                             except ValueError:
-                               try:
-                                   rowDate = row[0].split(" ")[0]
-                                   rowDate = datetime.datetime.strptime(rowDate, '%Y-%m-%d').date()
-                               except ValueError:
+                                try:
                                     try:
-                                    rowDate = datetime.datetime.strptime(row[0], '%a %b %d %H:%M:%S').date()
-                                    except ValueError:
-                                    print (row[0])
-                                    print ("Data is null")
+                                        rowDateList = row[0].split(" ")
+                                        rowDate = rowDateList[0] + "-" + rowDateList[1] + "-" + rowDateList[2] + "-" + rowDateList[5]
+                                        rowDate = datetime.datetime.strptime(rowDate, '%a-%b-%d-%Y').date()
+                                    except IndexError:
+                                        pass
+                                except ValueError:
+                                    pass
                     if rowDate < startDate:
                         if bloodSugar.isdigit():
                             bloodSugar = int(bloodSugar)
@@ -148,7 +147,7 @@ def flipThroughPath(path, lowerRange, upperRange, startDateFile = "none"):
         for file in filenames:
             filepath = subdirectory + os.sep + file
             if filepath.endswith(".csv") and "entries" in filepath:
-                print (filepath)
+                print (file)
                 if os.path.isfile(startDateFile):
                     parseTimeInRanges(filepath, lowerRange, upperRange, file, startDateFile)
                 else:
