@@ -71,21 +71,21 @@ def parseTimeInRanges(filename, lowerRange, upperRange, id, startDateFile):
                             rowDate = datetime.datetime.strptime(rowDate, '%m/%d/%Y').date()
                         except ValueError:
                             print (row[0])
-                            #try:
-                            #   rowDateList = row[0].split(" ")
-                            #   for item in rowDateList:
-                            #       print (item)
-                            #   rowDate = datetime.datetime.strptime(rowDate, '%a %b %d %Y').date()
-                            #except ValueError:
-                            #   try:
-                            #       rowDate = row[0].split(" ")[0]
-                            #       rowDate = datetime.datetime.strptime(rowDate, '%Y-%m-%d').date()
-                            #   except ValueError:
-                                    #try:
-                                    #rowDate = datetime.datetime.strptime(row[0], '%a %b %d %H:%M:%S').date()
-                                    #except ValueError:
-                                    #print (row[0])
-                                    #print ("Data is null")
+                            try:
+                               rowDateList = row[0].split(" ")
+                               for item in rowDateList:
+                                   print (item)
+                               rowDate = datetime.datetime.strptime(rowDate, '%a %b %d %Y').date()
+                            except ValueError:
+                               try:
+                                   rowDate = row[0].split(" ")[0]
+                                   rowDate = datetime.datetime.strptime(rowDate, '%Y-%m-%d').date()
+                               except ValueError:
+                                    try:
+                                    rowDate = datetime.datetime.strptime(row[0], '%a %b %d %H:%M:%S').date()
+                                    except ValueError:
+                                    print (row[0])
+                                    print ("Data is null")
                     if rowDate < startDate:
                         if bloodSugar.isdigit():
                             bloodSugar = int(bloodSugar)
@@ -115,7 +115,6 @@ def parseTimeInRanges(filename, lowerRange, upperRange, id, startDateFile):
             calculateTime(rangecountafterloop, totalcountafterloop, "range during loop")
             calculateTime(highcountafterloop, totalcountafterloop, "high during loop")
 
-#else:
 
 def parseTimeInRangesNoFile(filename, lowerRange, upperRange, id):
     with open (filename, 'r', newline='') as file:
